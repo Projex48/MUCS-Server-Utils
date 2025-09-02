@@ -1,12 +1,94 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>MUCS Server Statistics</title>
-    <script>
 
-    </script>
-  </head>
-  <body>
-    
-  </body>
+<head>
+  <title>MUCS Server Statistics</title>
+  <script>
+    async function getData() {
+      const tasks = [];
+
+      for (let i = 2; i <= 5; i++) {
+        tasks.push(updateServer(i));
+      }
+
+      await Promise.allSettled(tasks);
+    }
+
+    async function updateServer(i) {
+      const health = document.getElementById(`health-s${i}`);
+      const cpuElem = document.getElementById(`cpu-s${i}`);
+      const memElem = document.getElementById(`mem-s${i}`);
+
+      try {
+        const response = await fetch(`http://localhost:3000/${i}`);
+        if (!response.ok) {
+          health.style.color = "red";
+          health.textContent = "DEAD";
+          return;
+        }
+
+        const data = await response.json();
+        const cpu = Number(data.cpu);
+        const mem = Number(data.mem);
+
+        health.style.color = "green";
+        health.textContent = "ALIVE";
+        cpuElem.textContent = `%CPU: ${cpu}`;
+        memElem.textContent = `%MEM: ${mem}`;
+      } catch (err) {
+        health.style.color = "red";
+        health.textContent = "ERROR";
+        console.error(`Server ${i} fetch failed:`, err);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      getData();
+    });
+  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+    }
+
+    .serverWrapper {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .serverWrapper strong {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .serverWrapper p {
+      padding: 0;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="serverWrapper">
+    <strong>Server 2: <span id="health-s2"></span></strong>
+    <p id="cpu-s2">%CPU:</p>
+    <p id="mem-s2">%MEM:</p>
+  </div>
+  <div class="serverWrapper">
+    <strong>Server 3: <span id="health-s3"></span></strong>
+    <p id="cpu-s3">%CPU:</p>
+    <p id="mem-s3">%MEM:</p>
+  </div>
+  <div class="serverWrapper">
+    <strong>Server 4: <span id="health-s4"></span></strong>
+    <p id="cpu-s4">%CPU:</p>
+    <p id="mem-s4">%MEM:</p>
+  </div>
+  <div class="serverWrapper">
+    <strong>Server 5: <span id="health-s5"></span></strong>
+    <p id="cpu-s5">%CPU:</p>
+    <p id="mem-s5">%MEM:</p>
+  </div>
+</body>
+
 </html>
